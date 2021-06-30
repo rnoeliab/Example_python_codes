@@ -1,0 +1,75 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Feb 10 17:20:26 2020
+
+@author: noelia
+"""
+
+from netCDF4 import Dataset
+import matplotlib.pyplot as plt
+from matplotlib.cm import get_cmap
+import cartopy.crs as crs
+from cartopy.feature import NaturalEarthFeature
+from glob import glob
+from wrf import (to_np, getvar, smooth2d, get_cartopy, cartopy_xlim,
+                 cartopy_ylim, latlon_coords)
+
+wrf_file = sorted(glob("/data/noelia/modelo/wrf_chem_8/wrfout_d01_*"))  ## archivos wrfout
+output = "/data/noelia/modelo/examples_plot/"
+
+# Open the NetCDF file
+ncfile = Dataset(wrf_file[10])
+
+# Get the sea level pressure
+slp = getvar(ncfile, "slp")  ## [hPa]
+
+# Smooth the sea level pressure since it tends to be noisy near the
+# mountains
+smooth_slp = smooth2d(slp, 4, cenweight=5)
+
+# Get the latitude and longitude points
+lats, lons = latlon_coords(slp)
+
+# Get the cartopy mapping object
+cart_proj = get_cartopy(slp)
+
+# Create a figure
+fig = plt.figure(figsize=(12,6))
+# Set the GeoAxes to the projection used by WRF
+ax = plt.axes(projection=cart_proj)
+
+# Download and add the states and coastlines
+states = NaturalEarthFeature(category="cultural", scale="50m",
+                             facecolor="none",
+                             name="admin_1_states_provinces_shp")
+ax.add_feature(states, linewidth=.5, edgecolor="black")
+ax.coastlines('50m', linewidth=0.8)
+
+# Make the contour outlines and filled contours for the smoothed sea level
+# pressure.
+plt.contour(to_np(lons), to_np(lats), to_np(smooth_slp), 15, colors="grey",
+            transform=crs.PlateCarree())
+plt.contourf(to_np(lons), to_np(lats), to_np(smooth_slp), 15,
+             transform=crs.PlateCarree(),
+             cmap=get_cmap("jet"))
+
+# Add a color bar
+plt.colorbar(ax=ax, shrink=.98)
+
+# Set the map bounds
+ax.set_xlim(cartopy_xlim(smooth_slp))
+ax.set_ylim(cartopy_ylim(smooth_slp))
+
+# Add the gridlines
+ax.gridlines(color="black", linestyle="dotted")
+
+plt.title("Sea Level Pressure (hPa)")
+plt.savefig(output+"plotting_two_dimension_field.tif")
+
+plt.show()
+
+
+
+
+
