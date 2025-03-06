@@ -15,7 +15,7 @@ c. conda activate py39
 ```
 
 ## Read CO2 data from CAMS-inversion
-
+![all text](https://github.com/rnoeliab/Inputs-WRF-VPRM/blob/main/flowchart_vprm.png)
 
 
 
