@@ -1,8 +1,6 @@
 # Simple python examples
 
-
 ## Create a environment.yml
-
 ```
 > conda activate py39
 > conda env export --no-builds> environment.yml
@@ -16,7 +14,8 @@ b. conda env create -f environment.yml
 c. conda activate py39 
 ```
 
-## Clib a raster
+## Read CO2 data from CAMS-inversion
+
 
 
 
